@@ -1,0 +1,136 @@
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname Home
+!
+!
+!
+!
+!
+!
+!
+!
+no ip cef
+no ipv6 cef
+!
+!
+!
+username ISP1 password 0 cisco
+username ISP2 password 0 cisco
+!
+!
+license udi pid CISCO1941/K9 sn FTX1524N661-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+key chain mykey
+ key 1
+  key-string cisco
+!
+interface Tunnel0
+ ip address 172.25.24.2 255.255.255.252
+ mtu 1476
+ tunnel source Serial0/0/1
+ tunnel destination 10.0.0.6
+!
+!
+interface GigabitEthernet0/0
+ no ip address
+ ip helper-address 172.25.23.1
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.99
+ encapsulation dot1Q 99 native
+ ip address 192.168.6.1 255.255.255.0
+!
+interface GigabitEthernet0/0.100
+ encapsulation dot1Q 100
+ ip address 192.168.4.1 255.255.255.0
+ ip helper-address 172.25.23.1
+!
+interface GigabitEthernet0/0.200
+ encapsulation dot1Q 200
+ ip address 192.168.5.1 255.255.255.0
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Serial0/0/0
+ ip address 10.0.0.2 255.255.255.252
+ encapsulation ppp
+ ppp authentication chap
+ clock rate 2000000
+!
+interface Serial0/0/1
+ ip address 10.0.1.2 255.255.255.252
+ ip authentication mode eigrp 20 md5
+ ip authentication key-chain eigrp 20 mykey
+ encapsulation ppp
+ ppp authentication chap
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router eigrp 20
+ passive-interface GigabitEthernet0/0
+ passive-interface GigabitEthernet0/0.99
+ passive-interface GigabitEthernet0/0.100
+ passive-interface GigabitEthernet0/0.200
+ network 172.25.24.0 0.0.0.3
+ network 192.168.4.0
+ network 192.168.5.0
+ network 192.168.6.0
+ auto-summary
+!
+router bgp 1501
+ bgp log-neighbor-changes
+ no synchronization
+ neighbor 10.0.1.1 remote-as 1400
+ neighbor 10.0.0.1 remote-as 1001
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 Serial0/0/1 
+!
+ip flow-export version 9
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ logging synchronous
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
+

@@ -1,0 +1,82 @@
+enable
+  conf t
+  no ip domain-lookup
+  line con 0
+  loggin syn 
+  exit
+host ROOT_SW
+vtp domain IST
+vtp pass cisco
+vtp mode server
+int range f0/1-24, g0/1-2
+shut
+exit
+int ran f0/1-2
+ sw mo tru
+int ran g0/1-2
+ sw mo tru
+vlan 10
+ name Students
+vlan 20
+ name Faculty
+vlan 99
+ name Native
+ exit
+span mode r
+span vlan 1,10,20,99 root primary
+int port 1
+sw mo tr
+sw tr native vlan 99
+int port 2
+sw mo tr
+sw tr native vlan 99
+int ran f0/1-2
+ sw mo tru
+ sw tr na vlan 99
+ channel-group 1 mo active
+ no shut
+
+ ran g0/1-2
+ sw mo tru
+ channel-group 2 mo des
+ no shut
+
+aaa new-model
+aaa authentication login default local
+username ROOT_SW password cisco
+username SW2 password cisco
+username SW3 password cisco
+
+VTP client
+enable
+  conf t
+  no ip domain-lookup
+  line con 0
+  loggin syn 
+  exit
+host SW2
+vtp domain IST
+vtp pass cisco
+vtp mode client
+int range f0/1-24, g0/1-2
+shut
+exit
+int ran f0/1-2
+ sw mo tru
+ exit
+span mode r
+int port 1
+sw mo tr
+sw tr native vlan 99
+int ran f0/1-2
+ sw mo tru
+ sw tr na vla n 99
+ channel-group 1 mo active
+ no shut
+
+
+aaa new-model
+aaa authentication login default local
+username ROOT_SW password cisco
+username SW2 password cisco
+username SW3 password cisco
